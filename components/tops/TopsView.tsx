@@ -8,9 +8,12 @@ import { useTopsQuery } from "@/lib/hooks/queries"
 import { formatIsk, formatLastUpdate } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { TopItem } from "@/lib/eve/tops"
+import { useLocaleStore, useT } from "@/stores/locale-store"
 import { useMarketStore } from "@/stores/market-store"
 
 function TopCardInner({ item }: { item: TopItem }) {
+  const t = useT()
+
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
@@ -35,7 +38,7 @@ function TopCardInner({ item }: { item: TopItem }) {
         <div className="font-mono text-sm tabular-nums text-emerald-400">
           {formatIsk(item.averagePrice)}
         </div>
-        <div className="text-[11px] text-muted-foreground">precio medio</div>
+        <div className="text-[11px] text-muted-foreground">{t("tops.avgPrice")}</div>
       </div>
     </div>
   )
@@ -52,6 +55,8 @@ function TopSection({
   items: TopItem[]
   onSelect: (typeId: number) => void
 }) {
+  const t = useT()
+
   return (
     <Card size="sm" className="border-border/60 bg-card/40">
       <CardHeader className="border-b border-border/50">
@@ -60,7 +65,7 @@ function TopSection({
       </CardHeader>
       <CardContent className="gap-2">
         {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin datos de precios.</p>
+          <p className="text-sm text-muted-foreground">{t("tops.empty")}</p>
         ) : (
           items.map((item) => (
             <Link
@@ -79,6 +84,8 @@ function TopSection({
 }
 
 export function TopsView() {
+  const t = useT()
+  const locale = useLocaleStore((state) => state.locale)
   const topsQuery = useTopsQuery()
   const setSelectedTypeId = useMarketStore((state) => state.setSelectedTypeId)
   const [now, setNow] = useState(() => Date.now())
@@ -94,21 +101,18 @@ export function TopsView() {
   return (
     <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
       <header className="space-y-1 border-b border-border/50 pb-4">
-        <h1 className="text-3xl font-semibold tracking-tight">Tops 10</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Los recursos más caros para ganar ISK: minerales, menas y gases. Precios medios
-          oficiales de ESI.
-        </p>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("tops.title")}</h1>
+        <p className="max-w-2xl text-sm text-muted-foreground">{t("tops.description")}</p>
         {snapshot ? (
           <p className="text-xs text-muted-foreground">
-            {formatLastUpdate(snapshot.updatedAt, now)}
+            {formatLastUpdate(snapshot.updatedAt, now, locale)}
           </p>
         ) : null}
       </header>
 
       {topsQuery.isFetching ? (
         <p className="text-sm text-muted-foreground">
-          {topsQuery.isLoading ? "Cargando tops desde ESI…" : "Actualizando…"}
+          {topsQuery.isLoading ? t("tops.loading") : t("tops.updating")}
         </p>
       ) : null}
 
@@ -121,20 +125,20 @@ export function TopsView() {
       {snapshot ? (
         <div className="grid gap-6 lg:grid-cols-3">
           <TopSection
-            title="Top minerales"
-            subtitle="Los minerales más caros del mercado"
+            title={t("tops.minerals.title")}
+            subtitle={t("tops.minerals.subtitle")}
             items={snapshot.minerals}
             onSelect={setSelectedTypeId}
           />
           <TopSection
-            title="Top menas"
-            subtitle="Las menas base más caras para minar"
+            title={t("tops.ores.title")}
+            subtitle={t("tops.ores.subtitle")}
             items={snapshot.ores}
             onSelect={setSelectedTypeId}
           />
           <TopSection
-            title="Top gases"
-            subtitle="Fullerites más caros para recolectar"
+            title={t("tops.gases.title")}
+            subtitle={t("tops.gases.subtitle")}
             items={snapshot.gases}
             onSelect={setSelectedTypeId}
           />

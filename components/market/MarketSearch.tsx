@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 
 import { MARKET_RESOURCES, type MarketResource } from "@/data/resources"
 import { Input } from "@/components/ui/input"
+import { useT } from "@/stores/locale-store"
 import { cn } from "@/lib/utils"
 
 type MarketSearchProps = {
@@ -12,6 +13,7 @@ type MarketSearchProps = {
 }
 
 export function MarketSearch({ selectedTypeId, onSelect }: MarketSearchProps) {
+  const t = useT()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
 
@@ -31,7 +33,7 @@ export function MarketSearch({ selectedTypeId, onSelect }: MarketSearchProps) {
   return (
     <div className="relative w-full max-w-xl">
       <label className="mb-1.5 block text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        Buscar mineral o mena
+        {t("market.search.label")}
       </label>
       <Input
         value={open ? query : (selected?.name ?? query)}
@@ -44,10 +46,9 @@ export function MarketSearch({ selectedTypeId, onSelect }: MarketSearchProps) {
           setQuery(selected?.name ?? query)
         }}
         onBlur={() => {
-          // Delay so option click registers
           window.setTimeout(() => setOpen(false), 150)
         }}
-        placeholder="Ejemplo: Kernite"
+        placeholder={t("market.search.example")}
         autoComplete="off"
         className="font-mono"
       />
@@ -71,11 +72,11 @@ export function MarketSearch({ selectedTypeId, onSelect }: MarketSearchProps) {
                 <span>{resource.name}</span>
                 <span className="font-mono text-xs text-muted-foreground">
                   {resource.category === "mineral"
-                    ? "Mineral"
+                    ? t("market.category.mineral")
                     : resource.category === "gas"
-                      ? "Gas"
-                      : "Mena"}
-                  {resource.parentTypeId ? " · variante" : ""}
+                      ? t("market.category.gas")
+                      : t("market.category.ore")}
+                  {resource.parentTypeId ? ` · ${t("market.category.variant")}` : ""}
                 </span>
               </button>
             </li>

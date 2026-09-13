@@ -4,6 +4,8 @@ import { parseRegionId } from "@/data/regions"
 import { getResourceById } from "@/data/resources"
 import { EsiError } from "@/lib/eve/esi"
 import { getMarketSnapshot } from "@/lib/eve/market"
+import { resolveLocaleFromRequest } from "@/lib/i18n/locale"
+import { translate } from "@/lib/i18n/messages"
 import type { OrderType } from "@/types/market"
 
 export const revalidate = 300
@@ -20,16 +22,17 @@ function parseOrderType(value: string | null): OrderType {
 }
 
 export async function GET(request: Request, context: RouteContext) {
+  const locale = resolveLocaleFromRequest(request)
   const { typeId: typeIdParam } = await context.params
   const typeId = Number(typeIdParam)
 
   if (!Number.isInteger(typeId) || typeId <= 0) {
-    return NextResponse.json({ error: "typeId inválido" }, { status: 400 })
+    return NextResponse.json({ error: translate(locale, "api.invalidTypeId") }, { status: 400 })
   }
 
   if (!getResourceById(typeId)) {
     return NextResponse.json(
-      { error: "Este typeId no es un mineral, mena o gas soportado" },
+      { error: translate(locale, "api.unsupportedTypeId") },
       { status: 404 }
     )
   }
@@ -43,6 +46,7 @@ export async function GET(request: Request, context: RouteContext) {
       typeId,
       regionId: region,
       orderType,
+      locale,
     })
 
     return NextResponse.json(snapshot, {
@@ -55,7 +59,7 @@ export async function GET(request: Request, context: RouteContext) {
       const status = error.status === 404 ? 404 : error.status === 429 || error.status === 420 ? 429 : 502
       return NextResponse.json(
         {
-          error: "Error al consultar ESI",
+          error: translate(locale, "api.esiError"),
           details: error.message,
         },
         { status }
@@ -65,8 +69,8 @@ export async function GET(request: Request, context: RouteContext) {
     console.error(error)
     return NextResponse.json(
       {
-        error: "No se pudieron cargar los datos del mercado",
-        details: error instanceof Error ? error.message : "Error desconocido",
+        error: translate(locale, "api.marketLoadFailed"),
+        details: error instanceof Error ? error.message : translate(locale, "api.unknownError"),
       },
       { status: 500 }
     )

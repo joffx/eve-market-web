@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { useT } from "@/stores/locale-store"
 
 export const MARKET_PAGE_SIZE = 25
 
@@ -49,6 +50,8 @@ export function TablePagination({
   pageSize,
   onPageChange,
 }: TablePaginationProps) {
+  const t = useT()
+
   if (totalItems === 0) {
     return null
   }
@@ -58,9 +61,7 @@ export function TablePagination({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 px-1 pt-2 text-xs text-muted-foreground">
-      <p>
-        Mostrando {from}–{to} de {totalItems} · máx. {pageSize} por página
-      </p>
+      <p>{t("pagination.showing", { from, to, total: totalItems, pageSize })}</p>
       <div className="flex items-center gap-2">
         <Button
           type="button"
@@ -69,7 +70,7 @@ export function TablePagination({
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
-          Anterior
+          {t("pagination.prev")}
         </Button>
         <span className="font-mono tabular-nums">
           {page} / {totalPages}
@@ -81,7 +82,7 @@ export function TablePagination({
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
         >
-          Siguiente
+          {t("pagination.next")}
         </Button>
       </div>
     </div>

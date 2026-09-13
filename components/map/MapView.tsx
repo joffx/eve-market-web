@@ -10,6 +10,7 @@ import { fetchRoute, type RouteResult } from "@/lib/api/client"
 import { queryKeys } from "@/lib/hooks/queries"
 import { formatSecurity } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { useLocaleStore, useT } from "@/stores/locale-store"
 import { useMapStore } from "@/stores/map-store"
 
 const selectClassName =
@@ -21,13 +22,9 @@ function securityTone(securityClass: RouteResult["systems"][number]["securityCla
   return "text-red-400"
 }
 
-function securityLabel(securityClass: RouteResult["systems"][number]["securityClass"]) {
-  if (securityClass === "high") return "Alta seguridad"
-  if (securityClass === "low") return "Baja seguridad"
-  return "Nula seguridad"
-}
-
 export function MapView() {
+  const t = useT()
+  const locale = useLocaleStore((state) => state.locale)
   const originText = useMapStore((state) => state.originText)
   const destinationText = useMapStore((state) => state.destinationText)
   const originSystem = useMapStore((state) => state.originSystem)
@@ -46,8 +43,9 @@ export function MapView() {
       originName: originText.trim(),
       destinationName: destinationText.trim(),
       preference,
+      locale,
     }),
-    [originSystem, destinationSystem, originText, destinationText, preference]
+    [originSystem, destinationSystem, originText, destinationText, preference, locale]
   )
 
   const canCalculate =
@@ -66,31 +64,34 @@ export function MapView() {
   const summary = useMemo(() => {
     if (!result) return null
     if (result.isFullyHighSec) {
-      return { label: "Ruta segura (solo alta seguridad)", tone: "text-emerald-400" }
+      return { label: t("map.route.safe"), tone: "text-emerald-400" }
     }
     if (result.hasNullSec) {
-      return { label: "Ruta peligrosa (pasa por nula seguridad)", tone: "text-red-400" }
+      return { label: t("map.route.dangerous"), tone: "text-red-400" }
     }
-    return { label: "Ruta mixta (pasa por baja seguridad)", tone: "text-amber-400" }
-  }, [result])
+    return { label: t("map.route.mixed"), tone: "text-amber-400" }
+  }, [result, t])
+
+  function securityLabel(securityClass: RouteResult["systems"][number]["securityClass"]) {
+    if (securityClass === "high") return t("map.sec.high")
+    if (securityClass === "low") return t("map.sec.low")
+    return t("map.sec.null")
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
       <header className="space-y-1 border-b border-border/50 pb-4">
-        <h1 className="text-3xl font-semibold tracking-tight">Mapa de rutas</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Escribe y elige tu sistema de origen y destino del listado. Luego calcula los saltos
-          y revisa si la ruta es segura.
-        </p>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("map.title")}</h1>
+        <p className="max-w-2xl text-sm text-muted-foreground">{t("map.description")}</p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto] lg:items-end">
         <SystemSearch
           id="origin"
-          label="Dirección origen"
+          label={t("map.origin")}
           value={originText}
           selectedSystemId={originSystem?.systemId ?? null}
-          placeholder="Buscar sistema… ej. Jita"
+          placeholder={t("map.originPlaceholder")}
           onValueChange={setOriginText}
           onSelect={setOriginSystem}
         />
@@ -101,27 +102,25 @@ export function MapView() {
 
         <SystemSearch
           id="destination"
-          label="Dirección destino"
+          label={t("map.destination")}
           value={destinationText}
           selectedSystemId={destinationSystem?.systemId ?? null}
-          placeholder="Buscar sistema… ej. Amarr"
+          placeholder={t("map.destinationPlaceholder")}
           onValueChange={setDestinationText}
           onSelect={setDestinationSystem}
         />
 
         <div className="space-y-1.5">
-          <Label htmlFor="preference">Preferencia</Label>
+          <Label htmlFor="preference">{t("map.preference")}</Label>
           <select
             id="preference"
             className={selectClassName}
             value={preference}
-            onChange={(event) =>
-              setPreference(event.target.value as typeof preference)
-            }
+            onChange={(event) => setPreference(event.target.value as typeof preference)}
           >
-            <option value="secure">Más segura</option>
-            <option value="shorter">Más corta</option>
-            <option value="insecure">Menos segura</option>
+            <option value="secure">{t("map.pref.secure")}</option>
+            <option value="shorter">{t("map.pref.shorter")}</option>
+            <option value="insecure">{t("map.pref.insecure")}</option>
           </select>
         </div>
       </div>
@@ -129,13 +128,13 @@ export function MapView() {
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         {originSystem ? (
           <span>
-            Origen seleccionado:{" "}
+            {t("map.originSelected")}{" "}
             <span className="text-foreground">{originSystem.name}</span>
           </span>
         ) : null}
         {destinationSystem ? (
           <span>
-            Destino seleccionado:{" "}
+            {t("map.destinationSelected")}{" "}
             <span className="text-foreground">{destinationSystem.name}</span>
           </span>
         ) : null}
@@ -147,7 +146,7 @@ export function MapView() {
           disabled={!canCalculate || routeQuery.isFetching}
           onClick={() => void routeQuery.refetch()}
         >
-          {routeQuery.isFetching ? "Calculando…" : "Calcular ruta"}
+          {routeQuery.isFetching ? t("map.calculating") : t("map.calculate")}
         </Button>
       </div>
 
@@ -162,7 +161,7 @@ export function MapView() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-md border border-border/60 bg-card/40 p-3">
               <div className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                Origen
+                {t("map.result.origin")}
               </div>
               <div className="mt-1 font-medium">{result.origin.name}</div>
               <div className={cn("font-mono text-xs", securityTone(result.origin.securityClass))}>
@@ -172,7 +171,7 @@ export function MapView() {
             </div>
             <div className="rounded-md border border-border/60 bg-card/40 p-3">
               <div className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                Destino
+                {t("map.result.destination")}
               </div>
               <div className="mt-1 font-medium">{result.destination.name}</div>
               <div
@@ -187,13 +186,13 @@ export function MapView() {
             </div>
             <div className="rounded-md border border-border/60 bg-card/40 p-3">
               <div className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                Saltos
+                {t("map.result.jumps")}
               </div>
               <div className="mt-1 font-mono text-xl tabular-nums">{result.jumps}</div>
             </div>
             <div className="rounded-md border border-border/60 bg-card/40 p-3">
               <div className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                Seguridad
+                {t("market.col.security")}
               </div>
               <div className={cn("mt-1 text-sm font-medium", summary.tone)}>
                 {summary.label}
@@ -203,7 +202,7 @@ export function MapView() {
 
           <div className="rounded-md border border-border/60 bg-card/40">
             <div className="border-b border-border/50 px-3 py-2 text-sm font-medium">
-              Sistemas en la ruta ({result.systems.length})
+              {t("map.result.systems")} ({result.systems.length})
             </div>
             <ol className="divide-y divide-border/40">
               {result.systems.map((system, index) => (

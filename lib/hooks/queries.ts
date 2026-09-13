@@ -8,18 +8,20 @@ import {
   type RoutePreference,
 } from "@/lib/api/client"
 import type { OrderType } from "@/types/market"
+import { useLocaleStore } from "@/stores/locale-store"
 
 export const queryKeys = {
-  market: (typeId: number, region: number | "all", orderType: OrderType) =>
-    ["market", typeId, region, orderType] as const,
-  tops: ["tops"] as const,
-  systems: (query: string) => ["systems", query] as const,
+  market: (typeId: number, region: number | "all", orderType: OrderType, locale: string) =>
+    ["market", typeId, region, orderType, locale] as const,
+  tops: (locale: string) => ["tops", locale] as const,
+  systems: (query: string, locale: string) => ["systems", query, locale] as const,
   route: (input: {
     originId?: number | null
     destinationId?: number | null
     originName?: string
     destinationName?: string
     preference: RoutePreference
+    locale: string
   }) => ["route", input] as const,
 }
 
@@ -29,34 +31,41 @@ export function useMarketQuery(options: {
   orderType: OrderType
   enabled?: boolean
 }) {
+  const locale = useLocaleStore((state) => state.locale)
+
   return useQuery({
     queryKey: queryKeys.market(
       options.typeId ?? 0,
       options.region,
-      options.orderType
+      options.orderType,
+      locale
     ),
     queryFn: () =>
       fetchMarketSnapshot({
         typeId: options.typeId!,
         region: options.region,
         orderType: options.orderType,
+        locale,
       }),
     enabled: Boolean(options.typeId) && (options.enabled ?? true),
   })
 }
 
 export function useTopsQuery() {
+  const locale = useLocaleStore((state) => state.locale)
+
   return useQuery({
-    queryKey: queryKeys.tops,
-    queryFn: fetchTopsSnapshot,
+    queryKey: queryKeys.tops(locale),
+    queryFn: () => fetchTopsSnapshot(locale),
   })
 }
 
 export function useSystemsQuery(query: string, enabled: boolean) {
+  const locale = useLocaleStore((state) => state.locale)
   const normalized = query.trim()
   return useQuery({
-    queryKey: queryKeys.systems(normalized),
-    queryFn: () => fetchSystems(normalized),
+    queryKey: queryKeys.systems(normalized, locale),
+    queryFn: () => fetchSystems(normalized, locale),
     enabled: enabled && normalized.length >= 2,
   })
 }
@@ -71,18 +80,23 @@ export function useRouteQuery(
   },
   enabled: boolean
 ) {
+  const locale = useLocaleStore((state) => state.locale)
+  const withLocale = { ...input, locale }
+
   return useQuery({
-    queryKey: queryKeys.route(input),
-    queryFn: () => fetchRoute(input),
+    queryKey: queryKeys.route(withLocale),
+    queryFn: () => fetchRoute({ ...input, locale }),
     enabled,
   })
 }
 
 export function usePrefetchMarket() {
   const queryClient = useQueryClient()
+  const locale = useLocaleStore((state) => state.locale)
+
   return (typeId: number, region: number | "all", orderType: OrderType) =>
     queryClient.prefetchQuery({
-      queryKey: queryKeys.market(typeId, region, orderType),
-      queryFn: () => fetchMarketSnapshot({ typeId, region, orderType }),
+      queryKey: queryKeys.market(typeId, region, orderType, locale),
+      queryFn: () => fetchMarketSnapshot({ typeId, region, orderType, locale }),
     })
 }

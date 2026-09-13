@@ -2,6 +2,8 @@ import { MARKET_REGIONS, getRegionById } from "@/data/regions"
 import { getResourceById } from "@/data/resources"
 import { esiFetch } from "@/lib/eve/esi"
 import { resolveLocations, type LocationInfo } from "@/lib/eve/universe"
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locale"
+import { translate } from "@/lib/i18n/messages"
 import type {
   EsiMarketOrder,
   MarketOrderRow,
@@ -19,7 +21,8 @@ function addDays(isoDate: string, days: number): string {
 async function fetchOrdersForRegion(
   regionId: number,
   typeId: number,
-  orderType: OrderType
+  orderType: OrderType,
+  locale: Locale
 ): Promise<{ orders: EsiMarketOrder[]; updatedAt: string }> {
   const first = await esiFetch<EsiMarketOrder[]>(`/markets/${regionId}/orders/`, {
     searchParams: {
@@ -27,6 +30,7 @@ async function fetchOrdersForRegion(
       type_id: typeId,
       page: 1,
     },
+    locale,
   })
 
   const orders = [...first.data]
@@ -41,6 +45,7 @@ async function fetchOrdersForRegion(
             type_id: typeId,
             page: index + 2,
           },
+          locale,
         })
       )
     )
@@ -61,13 +66,14 @@ async function fetchOrdersForRegion(
 function resolveRowLocation(
   order: EsiMarketOrder,
   locations: Map<number, LocationInfo>,
-  systems: Map<number, { name: string; securityStatus: number }>
+  systems: Map<number, { name: string; securityStatus: number }>,
+  locale: Locale
 ): Pick<MarketOrderRow, "locationName" | "systemName" | "securityStatus"> {
   const location = locations.get(order.location_id)
   const system = systems.get(order.system_id)
 
   return {
-    locationName: location?.name ?? "Estructura de jugador desconocida",
+    locationName: location?.name ?? translate(locale, "market.unknownStructure"),
     systemName: location?.systemName ?? system?.name ?? null,
     securityStatus: location?.securityStatus ?? system?.securityStatus ?? null,
   }
@@ -162,10 +168,12 @@ export async function getMarketSnapshot(options: {
   typeId: number
   regionId?: number | "all"
   orderType?: OrderType
+  locale?: Locale
 }): Promise<MarketSnapshot> {
+  const locale = options.locale ?? DEFAULT_LOCALE
   const resource = getResourceById(options.typeId)
   if (!resource) {
-    throw new Error(`typeId desconocido: ${options.typeId}`)
+    throw new Error(translate(locale, "api.unknownTypeId", { id: options.typeId }))
   }
 
   const orderType = options.orderType ?? "all"
@@ -176,12 +184,12 @@ export async function getMarketSnapshot(options: {
       : MARKET_REGIONS.filter((region) => region.regionId === regionId)
 
   if (regions.length === 0) {
-    throw new Error(`regionId desconocido: ${String(regionId)}`)
+    throw new Error(translate(locale, "api.unknownRegionId", { id: String(regionId) }))
   }
 
   const regionResults = await Promise.all(
     regions.map(async (region) => {
-      const result = await fetchOrdersForRegion(region.regionId, options.typeId, orderType)
+      const result = await fetchOrdersForRegion(region.regionId, options.typeId, orderType, locale)
       return { regionId: region.regionId, ...result }
     })
   )
@@ -209,7 +217,7 @@ export async function getMarketSnapshot(options: {
 
   for (const result of regionResults) {
     for (const order of result.orders) {
-      const location = resolveRowLocation(order, locations, systems)
+      const location = resolveRowLocation(order, locations, systems, locale)
       const row = toOrderRow(order, result.regionId, result.updatedAt, location)
 
       if (order.is_buy_order) {

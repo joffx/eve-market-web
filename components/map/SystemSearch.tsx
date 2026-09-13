@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { filterSystems, type NamedSystem } from "@/data/systems"
 import { useSystemsQuery } from "@/lib/hooks/queries"
+import { useT } from "@/stores/locale-store"
 import { cn } from "@/lib/utils"
 
 export type SystemOption = NamedSystem
@@ -29,6 +30,7 @@ export function SystemSearch({
   onValueChange,
   onSelect,
 }: SystemSearchProps) {
+  const t = useT()
   const generatedId = useId()
   const inputId = id ?? generatedId
   const [open, setOpen] = useState(false)
@@ -78,12 +80,12 @@ export function SystemSearch({
       {open ? (
         <ul className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-md border border-border bg-popover shadow-lg">
           {systemsQuery.isFetching && results.length === 0 ? (
-            <li className="px-3 py-2 text-sm text-muted-foreground">Buscando…</li>
+            <li className="px-3 py-2 text-sm text-muted-foreground">{t("map.searching")}</li>
           ) : null}
 
           {!systemsQuery.isFetching && results.length === 0 ? (
             <li className="px-3 py-2 text-sm text-muted-foreground">
-              No hay ubicaciones para “{value || "…"}”
+              {t("map.noLocations", { query: value || "…" })}
             </li>
           ) : null}
 

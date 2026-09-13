@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState, type ReactNode } from "react"
 
+import { LocaleProvider } from "@/components/providers/locale-provider"
+
 type AppProvidersProps = {
   children: ReactNode
 }
@@ -22,5 +24,9 @@ export function AppProviders({ children }: AppProvidersProps) {
       })
   )
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <LocaleProvider>{children}</LocaleProvider>
+    </QueryClientProvider>
+  )
 }

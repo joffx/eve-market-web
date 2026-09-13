@@ -1,3 +1,6 @@
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locale"
+import { translate } from "@/lib/i18n/messages"
+
 const quantityFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 })
@@ -29,10 +32,10 @@ export function formatSecurity(value: number | null): string {
   return value.toFixed(1)
 }
 
-export function formatRange(range: string): string {
-  if (range === "station") return "Estación"
-  if (range === "solarsystem") return "Sistema"
-  if (range === "region") return "Región"
+export function formatRange(range: string, locale: Locale = DEFAULT_LOCALE): string {
+  if (range === "station") return translate(locale, "format.range.station")
+  if (range === "solarsystem") return translate(locale, "format.range.solarsystem")
+  if (range === "region") return translate(locale, "format.range.region")
   return range
 }
 
@@ -41,19 +44,24 @@ export function formatDateTime(iso: string): string {
   if (Number.isNaN(date.getTime())) {
     return "—"
   }
-  return date.toLocaleString("en-GB", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "UTC",
-  }) + " UTC"
+  return (
+    date.toLocaleString("en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "UTC",
+    }) + " UTC"
+  )
 }
 
-/** Relative time in Spanish, e.g. "hace 5 min", "hace 2 horas". */
-export function formatRelativeTime(iso: string, now = Date.now()): string {
+export function formatRelativeTime(
+  iso: string,
+  now = Date.now(),
+  locale: Locale = DEFAULT_LOCALE
+): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) {
     return "—"
@@ -64,31 +72,54 @@ export function formatRelativeTime(iso: string, now = Date.now()): string {
   const seconds = Math.floor(Math.abs(diffMs) / 1000)
 
   if (seconds < 10) {
-    return past ? "hace un momento" : "en un momento"
+    return translate(locale, past ? "format.relative.momentPast" : "format.relative.momentFuture")
   }
   if (seconds < 60) {
-    return past ? `hace ${seconds} s` : `en ${seconds} s`
+    return translate(locale, past ? "format.relative.secondsPast" : "format.relative.secondsFuture", {
+      n: seconds,
+    })
   }
 
   const minutes = Math.floor(seconds / 60)
   if (minutes < 60) {
-    const label = minutes === 1 ? "min" : "min"
-    return past ? `hace ${minutes} ${label}` : `en ${minutes} ${label}`
+    return translate(locale, past ? "format.relative.minutesPast" : "format.relative.minutesFuture", {
+      n: minutes,
+    })
   }
 
   const hours = Math.floor(minutes / 60)
   if (hours < 24) {
-    const label = hours === 1 ? "hora" : "horas"
-    return past ? `hace ${hours} ${label}` : `en ${hours} ${label}`
+    const key =
+      hours === 1
+        ? past
+          ? "format.relative.hourPast"
+          : "format.relative.hourFuture"
+        : past
+          ? "format.relative.hoursPast"
+          : "format.relative.hoursFuture"
+    return translate(locale, key, { n: hours })
   }
 
   const days = Math.floor(hours / 24)
-  const label = days === 1 ? "día" : "días"
-  return past ? `hace ${days} ${label}` : `en ${days} ${label}`
+  const key =
+    days === 1
+      ? past
+        ? "format.relative.dayPast"
+        : "format.relative.dayFuture"
+      : past
+        ? "format.relative.daysPast"
+        : "format.relative.daysFuture"
+  return translate(locale, key, { n: days })
 }
 
-export function formatLastUpdate(iso: string, now = Date.now()): string {
-  return `última actualización ${formatRelativeTime(iso, now)}`
+export function formatLastUpdate(
+  iso: string,
+  now = Date.now(),
+  locale: Locale = DEFAULT_LOCALE
+): string {
+  return translate(locale, "format.lastUpdate", {
+    relative: formatRelativeTime(iso, now, locale),
+  })
 }
 
 export function formatPercent(value: number | null): string {

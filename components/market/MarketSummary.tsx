@@ -1,5 +1,8 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatIsk, formatQuantity } from "@/lib/format"
+import { useT } from "@/stores/locale-store"
 import type { MarketSummary } from "@/types/market"
 
 type MarketMode = "sellers" | "buyers"
@@ -38,6 +41,8 @@ export function MarketSummaryCards({
   mode,
   orderCount,
 }: MarketSummaryProps) {
+  const t = useT()
+
   return (
     <Card size="sm" className="border-border/60 bg-card/60">
       <CardHeader className="border-b border-border/50">
@@ -47,25 +52,25 @@ export function MarketSummaryCards({
         {mode === "sellers" ? (
           <div className="grid gap-4 sm:grid-cols-3">
             <Stat
-              label="Mejor venta"
+              label={t("market.bestSell")}
               value={summary.bestSell === null ? "—" : formatIsk(summary.bestSell)}
             />
-            <Stat label="Volumen venta" value={formatQuantity(summary.sellVolume)} />
-            <Stat label="Órdenes" value={formatQuantity(orderCount)} />
+            <Stat label={t("market.sellVolume")} value={formatQuantity(summary.sellVolume)} />
+            <Stat label={t("market.orders")} value={formatQuantity(orderCount)} />
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-3">
             <Stat
-              label="Mejor compra"
+              label={t("market.bestBuy")}
               value={summary.bestBuy === null ? "—" : formatIsk(summary.bestBuy)}
               valueClassName="text-emerald-400"
             />
             <Stat
-              label="Volumen compra"
+              label={t("market.buyVolume")}
               value={formatQuantity(summary.buyVolume)}
               valueClassName="text-emerald-400"
             />
-            <Stat label="Órdenes" value={formatQuantity(orderCount)} />
+            <Stat label={t("market.orders")} value={formatQuantity(orderCount)} />
           </div>
         )}
       </CardContent>

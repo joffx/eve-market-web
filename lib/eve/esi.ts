@@ -1,3 +1,6 @@
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locale"
+import { translate } from "@/lib/i18n/messages"
+
 const ESI_BASE_URL = "https://esi.evetech.net"
 const ESI_USER_AGENT = "eve-market-web/1.0 (EVE Mining Market)"
 /** Pin API behavior; market routes remain offset-paginated (X-Pages). */
@@ -46,8 +49,10 @@ export async function esiFetch<T>(
   init?: RequestInit & {
     searchParams?: Record<string, string | number | undefined>
     revalidate?: number
+    locale?: Locale
   }
 ): Promise<EsiFetchResult<T>> {
+  const locale = init?.locale ?? DEFAULT_LOCALE
   const url = new URL(path.startsWith("http") ? path : `${ESI_BASE_URL}${path}`)
 
   if (init?.searchParams) {
@@ -78,19 +83,19 @@ export async function esiFetch<T>(
           await sleep(Math.max(retryAfterSeconds, 1) * 1000)
           continue
         }
-        throw new EsiError("Límite de tasa de ESI superado", response.status, retryAfterSeconds)
+        throw new EsiError(translate(locale, "api.esiRateLimit"), response.status, retryAfterSeconds)
       }
 
       if (response.status === 404) {
-        throw new EsiError("Recurso ESI no encontrado", 404)
+        throw new EsiError(translate(locale, "api.esiNotFound"), 404)
       }
 
       if (!response.ok) {
         const body = await response.text()
         throw new EsiError(
           body
-            ? `Error ESI (${response.status}): ${body}`
-            : `La consulta a ESI falló con estado ${response.status}`,
+            ? translate(locale, "api.esiErrorWithBody", { status: response.status, body })
+            : translate(locale, "api.esiRequestFailed", { status: response.status }),
           response.status
         )
       }
@@ -120,15 +125,20 @@ export async function esiFetch<T>(
   if (lastError instanceof Error) {
     throw lastError
   }
-  throw new EsiError("Error desconocido de ESI", 500)
+  throw new EsiError(translate(locale, "api.esiUnknown"), 500)
 }
 
-export async function esiPost<T>(path: string, body: unknown): Promise<T> {
+export async function esiPost<T>(
+  path: string,
+  body: unknown,
+  locale: Locale = DEFAULT_LOCALE
+): Promise<T> {
   const result = await esiFetch<T>(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
     revalidate: 3600,
+    locale,
   })
   return result.data
 }

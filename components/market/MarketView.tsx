@@ -10,6 +10,7 @@ import { SellersTable } from "@/components/market/SellersTable"
 import { getResourceById } from "@/data/resources"
 import { useMarketQuery } from "@/lib/hooks/queries"
 import { formatLastUpdate } from "@/lib/format"
+import { useLocaleStore, useT } from "@/stores/locale-store"
 import { useMarketStore } from "@/stores/market-store"
 import type { MarketOrderRow, MarketSummary } from "@/types/market"
 import type { MarketFilterState } from "@/components/market/MarketFilters"
@@ -66,6 +67,8 @@ type MarketViewProps = {
 }
 
 export function MarketView({ mode }: MarketViewProps) {
+  const t = useT()
+  const locale = useLocaleStore((state) => state.locale)
   const selectedTypeId = useMarketStore((state) => state.selectedTypeId)
   const filters = useMarketStore((state) => state.filters)
   const setSelectedTypeId = useMarketStore((state) => state.setSelectedTypeId)
@@ -74,11 +77,9 @@ export function MarketView({ mode }: MarketViewProps) {
   const [now, setNow] = useState(() => Date.now())
   const selected = getResourceById(selectedTypeId) ?? null
   const orderType = mode === "sellers" ? "sell" : "buy"
-  const title = mode === "sellers" ? "Vendedores" : "Compradores"
+  const title = mode === "sellers" ? t("market.sellers.title") : t("market.buyers.title")
   const description =
-    mode === "sellers"
-      ? "Órdenes de venta de minerales y menas. El precio más bajo aparece primero."
-      : "Órdenes de compra de minerales y menas. El precio más alto aparece primero."
+    mode === "sellers" ? t("market.sellers.description") : t("market.buyers.description")
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000)
@@ -154,7 +155,7 @@ export function MarketView({ mode }: MarketViewProps) {
 
       {marketQuery.isFetching ? (
         <p className="text-sm text-muted-foreground">
-          {marketQuery.isLoading ? "Cargando datos de ESI…" : "Actualizando…"}
+          {marketQuery.isLoading ? t("market.loading") : t("market.updating")}
         </p>
       ) : null}
 
@@ -170,7 +171,8 @@ export function MarketView({ mode }: MarketViewProps) {
             <div>
               <h2 className="text-xl font-medium">{selected.name}</h2>
               <p className="text-xs text-muted-foreground">
-                type_id {selected.typeId} · {formatLastUpdate(snapshot.updatedAt, now)}
+                type_id {selected.typeId} ·{" "}
+                {formatLastUpdate(snapshot.updatedAt, now, locale)}
               </p>
             </div>
           </div>
@@ -191,9 +193,7 @@ export function MarketView({ mode }: MarketViewProps) {
       ) : null}
 
       {!selected ? (
-        <p className="text-sm text-muted-foreground">
-          Selecciona un mineral o mena para ver el mercado.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("market.selectResource")}</p>
       ) : null}
     </div>
   )
