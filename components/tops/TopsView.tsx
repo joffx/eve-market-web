@@ -128,13 +128,13 @@ export function TopsView() {
           />
           <TopSection
             title="Top menas"
-            subtitle="Las ores base más caras para minar"
+            subtitle="Las menas base más caras para minar"
             items={snapshot.ores}
             onSelect={setSelectedTypeId}
           />
           <TopSection
             title="Top gases"
-            subtitle="Fullerites más caros para harvesting"
+            subtitle="Fullerites más caros para recolectar"
             items={snapshot.gases}
             onSelect={setSelectedTypeId}
           />

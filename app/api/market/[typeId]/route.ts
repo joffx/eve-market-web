@@ -29,7 +29,7 @@ export async function GET(request: Request, context: RouteContext) {
 
   if (!getResourceById(typeId)) {
     return NextResponse.json(
-      { error: "Este typeId no es un mineral o mena soportado" },
+      { error: "Este typeId no es un mineral, mena o gas soportado" },
       { status: 404 }
     )
   }

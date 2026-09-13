@@ -77,7 +77,7 @@ export function BuyersTable({ rows, now }: BuyersTableProps) {
                     {formatQuantity(row.minVolume)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
-                    {formatRelativeTime(row.updatedAt, now)}
+                    {formatRelativeTime(row.issued, now)}
                   </TableCell>
                 </TableRow>
               ))

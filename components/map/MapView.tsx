@@ -22,9 +22,9 @@ function securityTone(securityClass: RouteResult["systems"][number]["securityCla
 }
 
 function securityLabel(securityClass: RouteResult["systems"][number]["securityClass"]) {
-  if (securityClass === "high") return "High-sec"
-  if (securityClass === "low") return "Low-sec"
-  return "Null-sec"
+  if (securityClass === "high") return "Alta seguridad"
+  if (securityClass === "low") return "Baja seguridad"
+  return "Nula seguridad"
 }
 
 export function MapView() {
@@ -66,12 +66,12 @@ export function MapView() {
   const summary = useMemo(() => {
     if (!result) return null
     if (result.isFullyHighSec) {
-      return { label: "Ruta segura (solo high-sec)", tone: "text-emerald-400" }
+      return { label: "Ruta segura (solo alta seguridad)", tone: "text-emerald-400" }
     }
     if (result.hasNullSec) {
-      return { label: "Ruta peligrosa (pasa por null-sec)", tone: "text-red-400" }
+      return { label: "Ruta peligrosa (pasa por nula seguridad)", tone: "text-red-400" }
     }
-    return { label: "Ruta mixta (pasa por low-sec)", tone: "text-amber-400" }
+    return { label: "Ruta mixta (pasa por baja seguridad)", tone: "text-amber-400" }
   }, [result])
 
   return (

@@ -30,13 +30,6 @@ pnpm build
 pnpm start
 ```
 
-## Deploy en Vercel
-
-1. Importa este repositorio en Vercel.
-2. Framework preset: **Next.js**.
-3. Build command: `pnpm build`
-4. No requiere variables de entorno ni base de datos.
-
 ## Deploy con Docker / GHCR
 
 Imagen publicada por GitHub Actions en push a `main`:

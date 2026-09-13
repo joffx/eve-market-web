@@ -1,5 +1,5 @@
 const ESI_BASE_URL = "https://esi.evetech.net"
-const ESI_USER_AGENT = "eve-market-web/1.0 (EVE Mining Market; Vercel)"
+const ESI_USER_AGENT = "eve-market-web/1.0 (EVE Mining Market)"
 /** Pin API behavior; market routes remain offset-paginated (X-Pages). */
 const ESI_COMPATIBILITY_DATE = "2025-09-30"
 const ESI_REVALIDATE_SECONDS = 300
@@ -78,17 +78,19 @@ export async function esiFetch<T>(
           await sleep(Math.max(retryAfterSeconds, 1) * 1000)
           continue
         }
-        throw new EsiError("ESI rate limit exceeded", response.status, retryAfterSeconds)
+        throw new EsiError("Límite de tasa de ESI superado", response.status, retryAfterSeconds)
       }
 
       if (response.status === 404) {
-        throw new EsiError("ESI resource not found", 404)
+        throw new EsiError("Recurso ESI no encontrado", 404)
       }
 
       if (!response.ok) {
         const body = await response.text()
         throw new EsiError(
-          body || `ESI request failed with status ${response.status}`,
+          body
+            ? `Error ESI (${response.status}): ${body}`
+            : `La consulta a ESI falló con estado ${response.status}`,
           response.status
         )
       }
@@ -118,7 +120,7 @@ export async function esiFetch<T>(
   if (lastError instanceof Error) {
     throw lastError
   }
-  throw new EsiError("Unknown ESI error", 500)
+  throw new EsiError("Error desconocido de ESI", 500)
 }
 
 export async function esiPost<T>(path: string, body: unknown): Promise<T> {

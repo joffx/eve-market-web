@@ -165,7 +165,7 @@ export async function getMarketSnapshot(options: {
 }): Promise<MarketSnapshot> {
   const resource = getResourceById(options.typeId)
   if (!resource) {
-    throw new Error(`Unknown typeId: ${options.typeId}`)
+    throw new Error(`typeId desconocido: ${options.typeId}`)
   }
 
   const orderType = options.orderType ?? "all"
@@ -176,7 +176,7 @@ export async function getMarketSnapshot(options: {
       : MARKET_REGIONS.filter((region) => region.regionId === regionId)
 
   if (regions.length === 0) {
-    throw new Error(`Unknown regionId: ${String(regionId)}`)
+    throw new Error(`regionId desconocido: ${String(regionId)}`)
   }
 
   const regionResults = await Promise.all(
