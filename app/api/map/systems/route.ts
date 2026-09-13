@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server"
 
-import { filterSystems, type NamedSystem } from "@/data/systems"
+import { filterSystems, getSystemByName, type NamedSystem } from "@/data/systems"
 import { EsiError, esiPost } from "@/lib/eve/esi"
 import { resolveLocaleFromRequest } from "@/lib/i18n/locale"
 import { translate } from "@/lib/i18n/messages"
 
 export const revalidate = 3600
 
-async function resolveFromEsi(query: string, locale: ReturnType<typeof resolveLocaleFromRequest>) {
+async function resolveExactFromEsi(
+  query: string,
+  locale: ReturnType<typeof resolveLocaleFromRequest>
+): Promise<NamedSystem[]> {
   try {
     const data = await esiPost<{
       systems?: Array<{ id: number; name: string }>
@@ -28,25 +31,33 @@ async function resolveFromEsi(query: string, locale: ReturnType<typeof resolveLo
 export async function GET(request: Request) {
   const locale = resolveLocaleFromRequest(request)
   const { searchParams } = new URL(request.url)
-  const query = (searchParams.get("q") ?? "").trim()
+  const rawQuery = (searchParams.get("q") ?? "").trim()
+  const query = rawQuery.replace(/\*+$/g, "").trim()
 
   try {
-    const local = filterSystems(query, 12)
-    const esiMatches =
-      query.length >= 2 ? await resolveFromEsi(query, locale) : ([] as NamedSystem[])
+    // Local catalog covers high/low/null (prefix + contains). ESI only for exact extras.
+    const local = filterSystems(query, 20)
+    const exactLocal = query.length >= 2 ? getSystemByName(query) : undefined
+
+    let esiMatches: NamedSystem[] = []
+    if (query.length >= 2 && local.length < 5) {
+      esiMatches = await resolveExactFromEsi(query, locale)
+    }
 
     const byId = new Map<number, NamedSystem>()
-
-    for (const system of [...esiMatches, ...local]) {
+    if (exactLocal) {
+      byId.set(exactLocal.systemId, exactLocal)
+    }
+    for (const system of [...local, ...esiMatches]) {
       if (!byId.has(system.systemId)) {
         byId.set(system.systemId, system)
       }
     }
 
-    const results = [...byId.values()].slice(0, 15)
+    const results = [...byId.values()].slice(0, 20)
 
     return NextResponse.json({
-      query,
+      query: rawQuery,
       results,
     })
   } catch (error) {

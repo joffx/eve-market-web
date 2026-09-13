@@ -261,3 +261,40 @@ export async function fetchStrategyMines(options: {
 
   return payload as StrategyMinesSnapshot
 }
+
+export type ShipDetail = {
+  typeId: number
+  name: string
+  description: string
+  groupId: number
+  groupName: string
+  mass: number
+  volume: number
+  capacity: number
+  packagedVolume: number
+  radius: number
+  stats: Array<{ id: number; name: string; value: number }>
+}
+
+export async function fetchShipDetail(options: {
+  typeId: number
+  locale?: Locale
+}): Promise<ShipDetail> {
+  const locale = options.locale ?? DEFAULT_LOCALE
+  const params = new URLSearchParams({ lang: locale })
+  const response = await fetch(`/api/ships/${options.typeId}?${params.toString()}`, {
+    headers: localeHeaders(locale),
+  })
+  const payload = await readJson<ShipDetail | { error: string; details?: string }>(response)
+
+  if (!response.ok) {
+    throw new Error(
+      errorMessage(
+        payload as { error: string; details?: string },
+        translate(locale, "ships.detailFailed")
+      )
+    )
+  }
+
+  return payload as ShipDetail
+}

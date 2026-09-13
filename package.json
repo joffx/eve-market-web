@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:ships": "node scripts/generate-ships-catalog.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

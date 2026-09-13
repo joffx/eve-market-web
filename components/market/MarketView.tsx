@@ -105,9 +105,9 @@ export function MarketView({ mode }: MarketViewProps) {
     return sortOrders(
       applyPriceFilter(snapshot.sellers, minPrice, maxPrice),
       filters.sortBy,
-      "asc"
+      filters.sortDir
     )
-  }, [snapshot, minPrice, maxPrice, filters.sortBy])
+  }, [snapshot, minPrice, maxPrice, filters.sortBy, filters.sortDir])
 
   const buyers = useMemo(() => {
     if (!snapshot) {
@@ -116,9 +116,9 @@ export function MarketView({ mode }: MarketViewProps) {
     return sortOrders(
       applyPriceFilter(snapshot.buyers, minPrice, maxPrice),
       filters.sortBy,
-      "desc"
+      filters.sortDir
     )
-  }, [snapshot, minPrice, maxPrice, filters.sortBy])
+  }, [snapshot, minPrice, maxPrice, filters.sortBy, filters.sortDir])
 
   const summary = useMemo((): MarketSummary | null => {
     if (!snapshot || !selected) {

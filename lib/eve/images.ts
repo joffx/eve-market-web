@@ -17,3 +17,16 @@ export function eveTypeIconUrl(
 export function localTypeIconUrl(typeId: number): string {
   return `/api/eve-icon/${typeId}`
 }
+
+/** Official EVE type render (ships look best at 256–512). */
+export function eveTypeRenderUrl(
+  typeId: number,
+  size: EveTypeImageSize = 256
+): string {
+  return `${EVE_IMAGE_BASE}/types/${typeId}/render?size=${size}`
+}
+
+/** Same-origin proxy for ship renders (see /api/eve-render). */
+export function localTypeRenderUrl(typeId: number): string {
+  return `/api/eve-render/${typeId}`
+}

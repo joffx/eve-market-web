@@ -15,6 +15,7 @@ const NAV_HREFS = [
   { href: "/sellers", labelKey: "nav.sellers" as const },
   { href: "/buyers", labelKey: "nav.buyers" as const },
   { href: "/map", labelKey: "nav.map" as const },
+  { href: "/ships", labelKey: "nav.ships" as const },
   { href: "/strategy", labelKey: "nav.strategy" as const },
 ]
 
