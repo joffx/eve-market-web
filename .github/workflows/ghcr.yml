@@ -1,17 +1,26 @@
-# Build & push a GHCR — solo main.
-# Dokploy: ghcr.io/<owner>/eve-market-web:latest
-# Tras push: secret DOKPLOY_WEBHOOK_URL dispara redeploy (opcional).
+# Build & push a GHCR.
+# - main  → Environment production → :latest (+ webhook Dokploy fijo)
+# - develop / workflow_dispatch → Environment prueba → :prueba
 
 name: GHCR — Build & Push
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Entorno de deploy"
+        required: true
+        type: choice
+        options:
+          - production
+          - prueba
+        default: prueba
 
 concurrency:
-  group: ghcr-main
+  group: ghcr-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -21,7 +30,7 @@ jobs:
   build-and-push:
     name: Build & push
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || ((github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && 'production' || 'prueba') }}
     permissions:
       contents: read
       packages: write
@@ -30,8 +39,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Image name (lowercase)
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            DEPLOY_ENV="${{ inputs.environment }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            DEPLOY_ENV="production"
+          else
+            DEPLOY_ENV="prueba"
+          fi
+          echo "DEPLOY_ENV=$DEPLOY_ENV" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          echo "Entorno: $DEPLOY_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -49,7 +69,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=latest,enable=${{ steps.env.outputs.DEPLOY_ENV == 'production' }}
+            type=raw,value=prueba,enable=${{ steps.env.outputs.DEPLOY_ENV == 'prueba' }}
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -58,11 +79,12 @@ jobs:
       - name: Require Server Actions encryption key
         env:
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          DEPLOY_ENV: ${{ steps.env.outputs.DEPLOY_ENV }}
         run: |
           if [ -z "$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY" ]; then
-            echo "::error::Falta el secret NEXT_SERVER_ACTIONS_ENCRYPTION_KEY en el Environment 'production'."
+            echo "::error::Falta el secret NEXT_SERVER_ACTIONS_ENCRYPTION_KEY en el Environment '$DEPLOY_ENV'."
             echo "Genera una con: openssl rand -base64 32"
-            echo "Sin ella, tras cada deploy aparecen 'Failed to find Server Action' en el frontend."
+            echo "Añádela en Settings → Environments → $DEPLOY_ENV → Secrets."
             exit 1
           fi
 
@@ -83,16 +105,10 @@ jobs:
             NEXT_DEPLOYMENT_ID=${{ github.sha }}
 
       - name: Trigger Dokploy redeploy
-        if: success()
+        if: success() && steps.env.outputs.DEPLOY_ENV == 'production'
         continue-on-error: true
-        env:
-          DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
         run: |
-          if [ -z "$DOKPLOY_WEBHOOK_URL" ]; then
-            echo "Sin DOKPLOY_WEBHOOK_URL — se omite redeploy."
-            exit 0
-          fi
-          echo "Disparando redeploy Dokploy (eve-market-web)…"
-          curl -fsS -X POST "$DOKPLOY_WEBHOOK_URL" \
+          echo "Disparando redeploy Dokploy (production)…"
+          curl -fsS -X POST "https://server.fastery.dev/api/deploy/AOMm3dC6SGSF2UKY5q6bS" \
             -H "Content-Type: application/json" \
-            -d "{\"source\":\"ghcr\",\"repo\":\"${GITHUB_REPOSITORY}\",\"sha\":\"${GITHUB_SHA}\",\"image\":\"${REGISTRY}/${IMAGE_NAME}:latest\"}"
+            -d "{\"source\":\"ghcr\",\"repo\":\"${GITHUB_REPOSITORY}\",\"sha\":\"${GITHUB_SHA}\",\"image\":\"${REGISTRY}/${IMAGE_NAME}:latest\",\"environment\":\"production\"}"

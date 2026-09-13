@@ -32,10 +32,17 @@ pnpm start
 
 ## Deploy con Docker / GHCR
 
-Imagen publicada por GitHub Actions en push a `main`:
+GitHub Actions publica la imagen según el entorno:
+
+| Rama / trigger | Environment | Tag GHCR | Dokploy |
+|----------------|-------------|----------|---------|
+| `main` / tag `v*` | `production` | `:latest` | Sí (webhook) |
+| `develop` | `prueba` | `:prueba` | No |
+| Manual (`workflow_dispatch`) | elegido | `:latest` o `:prueba` | Solo si production |
 
 ```text
-ghcr.io/<owner>/eve-market-web:latest
+ghcr.io/<owner>/eve-market-web:latest   # producción
+ghcr.io/<owner>/eve-market-web:prueba   # prueba
 ```
 
 Archivos:
@@ -43,12 +50,13 @@ Archivos:
 - `Dockerfile` (Next.js standalone)
 - `.github/workflows/ghcr.yml`
 
-Secrets del Environment `production` en GitHub:
+Secrets por Environment (`production` y `prueba`) en GitHub:
 
-| Secret | Obligatorio | Descripción |
-|--------|-------------|-------------|
-| `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | Sí | `openssl rand -base64 32` |
-| `DOKPLOY_WEBHOOK_URL` | No | Webhook de redeploy en Dokploy |
+| Secret | Obligatorio | Entornos | Descripción |
+|--------|-------------|----------|-------------|
+| `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | Sí | ambos | `openssl rand -base64 32` (clave distinta por entorno) |
+
+El webhook de Dokploy (production) está fijo en el workflow.
 
 Correr local:
 
