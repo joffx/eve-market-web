@@ -1,0 +1,50 @@
+# Dependencies (se instalan con pnpm install --frozen-lockfile en el builder)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build output — NUNCA copiar .next del host al builder
+.next
+.next/**
+out
+dist
+build
+standalone
+
+# Git
+.git
+.gitignore
+
+# IDE / editor
+.idea
+.vscode
+*.swp
+*.swo
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env local
+.env
+.env.*
+!.env.example
+
+# Tests y cobertura
+coverage
+.nyc_output
+*.test.*
+*.spec.*
+
+# Documentación y misc
+README.md
+*.md
+.cursor
+.agents
+.github
+.pnpm-store
+*.tsbuildinfo
+next-env.d.ts
