@@ -12,10 +12,10 @@ import { cn } from "@/lib/utils"
 const NAV_HREFS = [
   { href: "/", labelKey: "nav.home" as const },
   { href: "/tops", labelKey: "nav.tops" as const },
-  { href: "/vendedores", labelKey: "nav.sellers" as const },
-  { href: "/compradores", labelKey: "nav.buyers" as const },
-  { href: "/estrategia-minera", labelKey: "nav.strategy" as const },
+  { href: "/sellers", labelKey: "nav.sellers" as const },
+  { href: "/buyers", labelKey: "nav.buyers" as const },
   { href: "/map", labelKey: "nav.map" as const },
+  { href: "/strategy", labelKey: "nav.strategy" as const },
 ]
 
 export function Navbar() {
@@ -41,11 +41,11 @@ export function Navbar() {
   }, [open])
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <BrandLogo priority onClick={() => setOpen(false)} />
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label={t("nav.main")}>
+        <nav className="hidden items-center gap-1 lg:flex" aria-label={t("nav.main")}>
           {NAV_HREFS.map((item) => {
             const active =
               item.href === "/"
@@ -57,10 +57,10 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm transition-colors",
+                  "rounded-md px-3 py-1.5 text-sm transition-colors duration-150",
                   active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 {t(item.labelKey)}
@@ -68,20 +68,18 @@ export function Navbar() {
             )
           })}
           <span
-            className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground/60"
+            className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground/50"
             title={t("nav.comingSoon")}
             aria-disabled="true"
           >
             {t("nav.loginEve")}
-            <span className="text-[10px] tracking-wide text-muted-foreground/50 uppercase">
-              {t("nav.comingSoon")}
-            </span>
+            <span className="text-[10px] tracking-wide uppercase">{t("nav.comingSoon")}</span>
           </span>
         </nav>
 
         <button
           type="button"
-          className="inline-flex size-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent md:hidden"
+          className="inline-flex size-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
@@ -94,7 +92,7 @@ export function Navbar() {
       <div
         id="mobile-nav"
         className={cn(
-          "border-t border-border/60 bg-background md:hidden",
+          "border-t border-border bg-background lg:hidden",
           open ? "block" : "hidden"
         )}
       >
@@ -114,10 +112,10 @@ export function Navbar() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded-md px-3 py-2.5 text-sm transition-colors",
+                  "rounded-md px-3 py-2.5 text-sm transition-colors duration-150",
                   active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 {t(item.labelKey)}
@@ -125,13 +123,11 @@ export function Navbar() {
             )
           })}
           <span
-            className="inline-flex cursor-not-allowed items-center gap-2 rounded-md px-3 py-2.5 text-sm text-muted-foreground/60"
+            className="inline-flex cursor-not-allowed items-center gap-2 rounded-md px-3 py-2.5 text-sm text-muted-foreground/50"
             aria-disabled="true"
           >
             {t("nav.loginEve")}
-            <span className="text-[10px] tracking-wide text-muted-foreground/50 uppercase">
-              {t("nav.comingSoon")}
-            </span>
+            <span className="text-[10px] tracking-wide uppercase">{t("nav.comingSoon")}</span>
           </span>
         </nav>
       </div>

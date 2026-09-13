@@ -10,10 +10,17 @@ export type TopItem = {
   adjustedPrice: number | null
 }
 
+export type ResourcePrice = {
+  typeId: number
+  averagePrice: number
+}
+
 export type TopsSnapshot = {
   minerals: TopItem[]
   ores: TopItem[]
   gases: TopItem[]
+  /** Average ESI prices for all catalog resources (strategy sorting, etc.). */
+  resourcePrices: ResourcePrice[]
   updatedAt: string
 }
 
@@ -69,10 +76,19 @@ export async function getTopsSnapshot(limit = 10): Promise<TopsSnapshot> {
 
   const priceByType = new Map(data.map((entry) => [entry.type_id, entry]))
 
+  const resourcePrices: ResourcePrice[] = []
+  for (const resource of MARKET_RESOURCES) {
+    const averagePrice = priceByType.get(resource.typeId)?.average_price
+    if (averagePrice !== undefined && Number.isFinite(averagePrice)) {
+      resourcePrices.push({ typeId: resource.typeId, averagePrice })
+    }
+  }
+
   return {
     minerals: rankCategory("mineral", priceByType, limit),
     ores: rankCategory("ore", priceByType, limit, { baseOnly: true }),
     gases: rankCategory("gas", priceByType, limit),
+    resourcePrices,
     updatedAt: lastModified
       ? new Date(lastModified).toISOString()
       : new Date().toISOString(),

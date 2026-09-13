@@ -1,19 +1,20 @@
 import type { Metadata } from "next"
 
 import { LandingHero } from "@/components/landing/LandingHero"
-import { LandingTools } from "@/components/landing/LandingTools"
+import { LandingMarketBoard, LandingStats } from "@/components/landing/LandingMarketBoard"
 
 export const metadata: Metadata = {
   title: "Inicio",
   description:
-    "EVE Mining Market: precios de minerales y menas con la API oficial ESI.",
+    "Live market data, mining locations and tools for smarter decisions across New Eden.",
 }
 
 export default function HomePage() {
   return (
     <>
       <LandingHero />
-      <LandingTools />
+      <LandingStats />
+      <LandingMarketBoard />
     </>
   )
 }

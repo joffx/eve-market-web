@@ -17,8 +17,8 @@ import {
   formatQuantity,
   formatRange,
   formatRelativeTime,
-  formatSecurity,
 } from "@/lib/format"
+import { SecurityBadge } from "@/components/market/SecurityBadge"
 import { useLocaleStore, useT } from "@/stores/locale-store"
 import type { MarketOrderRow } from "@/types/market"
 
@@ -66,14 +66,14 @@ export function BuyersTable({ rows, now }: BuyersTableProps) {
                   <TableCell className="text-right font-mono tabular-nums">
                     {formatQuantity(row.quantity)}
                   </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums text-emerald-400">
+                  <TableCell className="text-right font-mono tabular-nums text-buy">
                     {formatIsk(row.price)}
                   </TableCell>
                   <TableCell className="max-w-[28rem] truncate" title={row.locationName}>
                     {row.locationName}
                   </TableCell>
                   <TableCell className="text-right font-mono tabular-nums">
-                    {formatSecurity(row.securityStatus)}
+                    <SecurityBadge value={row.securityStatus} />
                   </TableCell>
                   <TableCell>{formatRange(row.range, locale)}</TableCell>
                   <TableCell className="text-right font-mono tabular-nums">

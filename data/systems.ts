@@ -20,6 +20,13 @@ export const POPULAR_SYSTEMS: NamedSystem[] = [
   { systemId: 30000132, name: "Ansila", region: "The Forge" },
   { systemId: 30000134, name: "Hykkota", region: "The Forge" },
   { systemId: 30002282, name: "Bhizheba", region: "Domain" },
+  // Low-sec mining picks
+  { systemId: 30002813, name: "Tama", region: "The Citadel" },
+  { systemId: 30003787, name: "Agoze", region: "Placid" },
+  { systemId: 30003799, name: "Uphallant", region: "Placid" },
+  { systemId: 30002537, name: "Amamake", region: "Heimatar" },
+  { systemId: 30002718, name: "Rancer", region: "Sinq Laison" },
+  { systemId: 30003067, name: "Huola", region: "The Bleak Lands" },
 ]
 
 export function filterSystems(query: string, limit = 12): NamedSystem[] {

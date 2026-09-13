@@ -19,13 +19,13 @@ const TOOLS: Array<{
   icon: typeof IconTruckDelivery
 }> = [
   {
-    href: "/vendedores",
+    href: "/sellers",
     titleKey: "landing.tool.sellers.title",
     descKey: "landing.tool.sellers.desc",
     icon: IconTruckDelivery,
   },
   {
-    href: "/compradores",
+    href: "/buyers",
     titleKey: "landing.tool.buyers.title",
     descKey: "landing.tool.buyers.desc",
     icon: IconShoppingCart,
@@ -43,7 +43,7 @@ const TOOLS: Array<{
     icon: IconMapRoute,
   },
   {
-    href: "/estrategia-minera",
+    href: "/strategy",
     titleKey: "landing.tool.strategy.title",
     descKey: "landing.tool.strategy.desc",
     icon: IconPick,
@@ -72,14 +72,14 @@ export function LandingTools() {
               <li key={tool.href}>
                 <Link
                   href={tool.href}
-                  className="group flex flex-col gap-2 py-5 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-6"
+                  className="group flex flex-col gap-2 py-5 transition-colors duration-150 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-6"
                 >
                   <div className="flex items-start gap-3 sm:items-center sm:gap-4">
-                    <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border/60 bg-[oklch(0.2_0.02_220)] text-[oklch(0.78_0.08_200)] transition-colors group-hover:border-[oklch(0.55_0.08_200_/_0.5)] group-hover:text-[oklch(0.88_0.08_200)] sm:mt-0">
+                    <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card-elevated text-primary transition-colors group-hover:border-primary/40 sm:mt-0">
                       <Icon className="size-4" stroke={1.75} />
                     </span>
                     <div>
-                      <p className="font-medium tracking-tight group-hover:text-[oklch(0.9_0.04_200)]">
+                      <p className="font-medium tracking-tight group-hover:text-primary">
                         {t(tool.titleKey)}
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">{t(tool.descKey)}</p>

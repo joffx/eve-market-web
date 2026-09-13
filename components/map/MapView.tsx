@@ -17,9 +17,9 @@ const selectClassName =
   "h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
 
 function securityTone(securityClass: RouteResult["systems"][number]["securityClass"]) {
-  if (securityClass === "high") return "text-emerald-400"
-  if (securityClass === "low") return "text-amber-400"
-  return "text-red-400"
+  if (securityClass === "high") return "text-success"
+  if (securityClass === "low") return "text-warning"
+  return "text-destructive"
 }
 
 export function MapView() {
@@ -64,12 +64,12 @@ export function MapView() {
   const summary = useMemo(() => {
     if (!result) return null
     if (result.isFullyHighSec) {
-      return { label: t("map.route.safe"), tone: "text-emerald-400" }
+      return { label: t("map.route.safe"), tone: "text-success" }
     }
     if (result.hasNullSec) {
-      return { label: t("map.route.dangerous"), tone: "text-red-400" }
+      return { label: t("map.route.dangerous"), tone: "text-destructive" }
     }
-    return { label: t("map.route.mixed"), tone: "text-amber-400" }
+    return { label: t("map.route.mixed"), tone: "text-warning" }
   }, [result, t])
 
   function securityLabel(securityClass: RouteResult["systems"][number]["securityClass"]) {

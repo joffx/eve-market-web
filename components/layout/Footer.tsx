@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils"
 
 const FOOTER_LINKS = [
   { href: "/tops", labelKey: "nav.tops" as const },
-  { href: "/vendedores", labelKey: "nav.sellers" as const },
-  { href: "/compradores", labelKey: "nav.buyers" as const },
-  { href: "/estrategia-minera", labelKey: "nav.strategy" as const },
+  { href: "/sellers", labelKey: "nav.sellers" as const },
+  { href: "/buyers", labelKey: "nav.buyers" as const },
   { href: "/map", labelKey: "nav.map" as const },
+  { href: "/strategy", labelKey: "nav.strategy" as const },
 ]
 
 export function Footer() {
@@ -21,7 +21,7 @@ export function Footer() {
   const setLocale = useLocaleStore((state) => state.setLocale)
 
   return (
-    <footer className="mt-auto border-t border-border/60 bg-[oklch(0.13_0.015_240)]">
+    <footer className="mt-auto border-t border-border bg-background-secondary">
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-sm space-y-3">
@@ -35,7 +35,7 @@ export function Footer() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-muted-foreground transition-colors duration-150 hover:text-foreground"
                 >
                   {t(item.labelKey)}
                 </Link>
@@ -53,10 +53,10 @@ export function Footer() {
                     type="button"
                     onClick={() => setLocale(code)}
                     className={cn(
-                      "rounded-md border px-3 py-1.5 text-sm transition-colors",
+                      "rounded-md border px-3 py-1.5 text-sm transition-colors duration-150",
                       locale === code
-                        ? "border-border bg-accent text-accent-foreground"
-                        : "border-border/50 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                     aria-pressed={locale === code}
                   >
@@ -68,7 +68,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-border/40 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>{t("footer.legal")}</p>
           <p>{t("footer.madeBy")}</p>
         </div>

@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   fetchMarketSnapshot,
   fetchRoute,
+  fetchStrategyBuyers,
+  fetchStrategyMines,
   fetchSystems,
   fetchTopsSnapshot,
   type RoutePreference,
@@ -23,6 +25,14 @@ export const queryKeys = {
     preference: RoutePreference
     locale: string
   }) => ["route", input] as const,
+  strategyBuyers: (typeId: number, locale: string) =>
+    ["strategy", "buyers", typeId, locale] as const,
+  strategyMines: (
+    typeId: number,
+    sellSystemId: number,
+    originId: number | "none",
+    locale: string
+  ) => ["strategy", "mines", typeId, sellSystemId, originId, locale] as const,
 }
 
 export function useMarketQuery(options: {
@@ -99,4 +109,49 @@ export function usePrefetchMarket() {
       queryKey: queryKeys.market(typeId, region, orderType, locale),
       queryFn: () => fetchMarketSnapshot({ typeId, region, orderType, locale }),
     })
+}
+
+export function useStrategyBuyersQuery(options: {
+  typeId: number | null
+  enabled?: boolean
+}) {
+  const locale = useLocaleStore((state) => state.locale)
+
+  return useQuery({
+    queryKey: queryKeys.strategyBuyers(options.typeId ?? 0, locale),
+    queryFn: () =>
+      fetchStrategyBuyers({
+        typeId: options.typeId!,
+        locale,
+      }),
+    enabled: Boolean(options.typeId) && (options.enabled ?? true),
+  })
+}
+
+export function useStrategyMinesQuery(options: {
+  typeId: number | null
+  sellSystemId: number | null
+  originId?: number | null
+  enabled?: boolean
+}) {
+  const locale = useLocaleStore((state) => state.locale)
+  const originKey = options.originId ?? "none"
+
+  return useQuery({
+    queryKey: queryKeys.strategyMines(
+      options.typeId ?? 0,
+      options.sellSystemId ?? 0,
+      originKey,
+      locale
+    ),
+    queryFn: () =>
+      fetchStrategyMines({
+        typeId: options.typeId!,
+        sellSystemId: options.sellSystemId!,
+        originId: options.originId ?? null,
+        locale,
+      }),
+    enabled:
+      Boolean(options.typeId && options.sellSystemId) && (options.enabled ?? true),
+  })
 }

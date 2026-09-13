@@ -4,6 +4,8 @@ import { useMemo, useState } from "react"
 
 import { MARKET_RESOURCES, type MarketResource } from "@/data/resources"
 import { Input } from "@/components/ui/input"
+import { ResourceSecurityBadge } from "@/components/market/ResourceSecurityBadge"
+import { TypeIcon } from "@/components/market/TypeIcon"
 import { useT } from "@/stores/locale-store"
 import { cn } from "@/lib/utils"
 
@@ -59,7 +61,7 @@ export function MarketSearch({ selectedTypeId, onSelect }: MarketSearchProps) {
               <button
                 type="button"
                 className={cn(
-                  "flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent",
+                  "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent",
                   selectedTypeId === resource.typeId && "bg-accent/60"
                 )}
                 onMouseDown={(event) => event.preventDefault()}
@@ -69,14 +71,20 @@ export function MarketSearch({ selectedTypeId, onSelect }: MarketSearchProps) {
                   setOpen(false)
                 }}
               >
-                <span>{resource.name}</span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {resource.category === "mineral"
-                    ? t("market.category.mineral")
-                    : resource.category === "gas"
-                      ? t("market.category.gas")
-                      : t("market.category.ore")}
-                  {resource.parentTypeId ? ` · ${t("market.category.variant")}` : ""}
+                <span className="flex min-w-0 items-center gap-2">
+                  <TypeIcon typeId={resource.typeId} name={resource.name} size={32} />
+                  <span className="truncate">{resource.name}</span>
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <ResourceSecurityBadge typeId={resource.typeId} />
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {resource.category === "mineral"
+                      ? t("market.category.mineral")
+                      : resource.category === "gas"
+                        ? t("market.category.gas")
+                        : t("market.category.ore")}
+                    {resource.parentTypeId ? ` · ${t("market.category.variant")}` : ""}
+                  </span>
                 </span>
               </button>
             </li>

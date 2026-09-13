@@ -16,8 +16,8 @@ import {
   formatIsk,
   formatQuantity,
   formatRelativeTime,
-  formatSecurity,
 } from "@/lib/format"
+import { SecurityBadge } from "@/components/market/SecurityBadge"
 import { useLocaleStore, useT } from "@/stores/locale-store"
 import type { MarketOrderRow } from "@/types/market"
 
@@ -70,7 +70,7 @@ export function SellersTable({ rows, now }: SellersTableProps) {
                     {row.locationName}
                   </TableCell>
                   <TableCell className="text-right font-mono tabular-nums">
-                    {formatSecurity(row.securityStatus)}
+                    <SecurityBadge value={row.securityStatus} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {formatRelativeTime(row.issued, now, locale)}

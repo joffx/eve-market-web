@@ -146,3 +146,118 @@ export async function fetchSystems(
   const payload = await readJson<{ results: SystemOption[] }>(response)
   return payload.results ?? []
 }
+
+export type StrategyBuyHub = {
+  rank: number
+  recommended: boolean
+  regionId: number
+  regionName: string
+  hubName: string
+  bestPrice: number
+  buyVolume: number
+  orderCount: number
+  locationId: number
+  locationName: string
+  systemId: number
+  systemName: string
+}
+
+export type StrategyBuyersSnapshot = {
+  typeId: number
+  typeName: string
+  best: StrategyBuyHub | null
+  hubs: StrategyBuyHub[]
+  updatedAt: string
+}
+
+export type StrategyMineSite = {
+  rank: number
+  systemId: number
+  name: string
+  securityStatus: number
+  securityClass: "high" | "low" | "null"
+  jumpsFromOrigin: number | null
+  jumpsToMarket: number
+  totalJumps: number
+}
+
+export type StrategyMinesSnapshot = {
+  typeId: number
+  typeName: string
+  origin: {
+    systemId: number
+    name: string
+    securityStatus: number
+    securityClass: "high" | "low" | "null"
+  } | null
+  sellSystem: {
+    systemId: number
+    name: string
+    securityStatus: number
+    securityClass: "high" | "low" | "null"
+  }
+  sites: StrategyMineSite[]
+  updatedAt: string
+}
+
+export async function fetchStrategyBuyers(options: {
+  typeId: number
+  locale?: Locale
+}): Promise<StrategyBuyersSnapshot> {
+  const locale = options.locale ?? DEFAULT_LOCALE
+  const params = new URLSearchParams({
+    typeId: String(options.typeId),
+    lang: locale,
+  })
+  const response = await fetch(`/api/strategy/buyers?${params.toString()}`, {
+    headers: localeHeaders(locale),
+  })
+  const payload = await readJson<
+    StrategyBuyersSnapshot | { error: string; details?: string }
+  >(response)
+
+  if (!response.ok) {
+    throw new Error(
+      errorMessage(
+        payload as { error: string; details?: string },
+        translate(locale, "strategy.api.failed")
+      )
+    )
+  }
+
+  return payload as StrategyBuyersSnapshot
+}
+
+export async function fetchStrategyMines(options: {
+  typeId: number
+  sellSystemId: number
+  originId?: number | null
+  locale?: Locale
+}): Promise<StrategyMinesSnapshot> {
+  const locale = options.locale ?? DEFAULT_LOCALE
+  const params = new URLSearchParams({
+    typeId: String(options.typeId),
+    sellSystemId: String(options.sellSystemId),
+    lang: locale,
+  })
+  if (options.originId) {
+    params.set("originId", String(options.originId))
+  }
+  const response = await fetch(`/api/strategy/mines?${params.toString()}`, {
+    headers: localeHeaders(locale),
+  })
+  const payload = await readJson<
+    StrategyMinesSnapshot | { error: string; details?: string }
+  >(response)
+
+  if (!response.ok) {
+    throw new Error(
+      errorMessage(
+        payload as { error: string; details?: string },
+        translate(locale, "strategy.api.failed")
+      )
+    )
+  }
+
+  return payload as StrategyMinesSnapshot
+}

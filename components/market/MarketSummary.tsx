@@ -63,12 +63,12 @@ export function MarketSummaryCards({
             <Stat
               label={t("market.bestBuy")}
               value={summary.bestBuy === null ? "—" : formatIsk(summary.bestBuy)}
-              valueClassName="text-emerald-400"
+              valueClassName="text-buy"
             />
             <Stat
               label={t("market.buyVolume")}
               value={formatQuantity(summary.buyVolume)}
-              valueClassName="text-emerald-400"
+              valueClassName="text-buy"
             />
             <Stat label={t("market.orders")} value={formatQuantity(orderCount)} />
           </div>
