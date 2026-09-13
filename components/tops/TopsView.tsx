@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { TypeIcon } from "@/components/market/TypeIcon"
+import { ResourceSecurityBadge } from "@/components/market/ResourceSecurityBadge"
 import { useTopsQuery } from "@/lib/hooks/queries"
 import { formatIsk, formatLastUpdate } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -18,11 +20,12 @@ function TopCardInner({ item }: { item: TopItem }) {
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
+          <TypeIcon typeId={item.typeId} name={item.name} size={32} />
           <span
             className={cn(
               "inline-flex size-6 items-center justify-center rounded-md text-xs font-semibold",
               item.rank <= 3
-                ? "bg-amber-500/20 text-amber-300"
+                ? "bg-primary/15 text-primary"
                 : "bg-muted text-muted-foreground"
             )}
           >
@@ -30,15 +33,15 @@ function TopCardInner({ item }: { item: TopItem }) {
           </span>
           <span className="truncate font-medium">{item.name}</span>
         </div>
-        <p className="mt-1 font-mono text-xs text-muted-foreground">
-          type_id {item.typeId}
-        </p>
       </div>
       <div className="shrink-0 text-right">
-        <div className="font-mono text-sm tabular-nums text-emerald-400">
+        <div className="font-mono text-sm tabular-nums text-buy">
           {formatIsk(item.averagePrice)}
         </div>
         <div className="text-[11px] text-muted-foreground">{t("tops.avgPrice")}</div>
+        <div className="mt-1 flex justify-end">
+          <ResourceSecurityBadge typeId={item.typeId} />
+        </div>
       </div>
     </div>
   )
@@ -70,7 +73,7 @@ function TopSection({
           items.map((item) => (
             <Link
               key={item.typeId}
-              href="/vendedores"
+              href="/sellers"
               onClick={() => onSelect(item.typeId)}
               className="block rounded-lg border border-border/60 bg-card/50 p-3 transition-colors hover:bg-accent/40"
             >

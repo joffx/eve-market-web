@@ -6,7 +6,9 @@ import { BuyersTable } from "@/components/market/BuyersTable"
 import { MarketFilters } from "@/components/market/MarketFilters"
 import { MarketSearch } from "@/components/market/MarketSearch"
 import { MarketSummaryCards } from "@/components/market/MarketSummary"
+import { ResourceSecurityBadge } from "@/components/market/ResourceSecurityBadge"
 import { SellersTable } from "@/components/market/SellersTable"
+import { TypeIcon } from "@/components/market/TypeIcon"
 import { getResourceById } from "@/data/resources"
 import { useMarketQuery } from "@/lib/hooks/queries"
 import { formatLastUpdate } from "@/lib/format"
@@ -168,12 +170,17 @@ export function MarketView({ mode }: MarketViewProps) {
       {selected && snapshot && summary && !error ? (
         <>
           <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 className="text-xl font-medium">{selected.name}</h2>
-              <p className="text-xs text-muted-foreground">
-                type_id {selected.typeId} ·{" "}
-                {formatLastUpdate(snapshot.updatedAt, now, locale)}
-              </p>
+            <div className="flex items-center gap-3">
+              <TypeIcon typeId={selected.typeId} name={selected.name} size={40} />
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-xl font-medium">{selected.name}</h2>
+                  <ResourceSecurityBadge typeId={selected.typeId} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {formatLastUpdate(snapshot.updatedAt, now, locale)}
+                </p>
+              </div>
             </div>
           </div>
 
