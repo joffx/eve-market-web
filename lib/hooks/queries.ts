@@ -33,6 +33,7 @@ export const queryKeys = {
     originId: number | "none",
     locale: string
   ) => ["strategy", "mines", typeId, sellSystemId, originId, locale] as const,
+  shipDetail: (typeId: number, locale: string) => ["ships", typeId, locale] as const,
 }
 
 export function useMarketQuery(options: {

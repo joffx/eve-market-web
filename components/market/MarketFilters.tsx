@@ -12,6 +12,8 @@ export type MarketFilterState = {
   minPrice: string
   maxPrice: string
   sortBy: "price" | "quantity" | "region"
+  /** Precio/cantidad: mayor→menor (desc) o menor→mayor (asc). */
+  sortDir: "asc" | "desc"
 }
 
 type MarketFiltersProps = {
@@ -34,8 +36,8 @@ export function MarketFilters({
     <div
       className={
         showOrderType
-          ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
-          : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-6"
+          : "grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
       }
     >
       <div className="space-y-1.5">
@@ -123,6 +125,24 @@ export function MarketFilters({
           <option value="price">{t("market.filter.sort.price")}</option>
           <option value="quantity">{t("market.filter.sort.quantity")}</option>
           <option value="region">{t("market.filter.sort.region")}</option>
+        </select>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="sortDir">{t("market.filter.sortDir")}</Label>
+        <select
+          id="sortDir"
+          className={selectClassName}
+          value={filters.sortDir}
+          onChange={(event) =>
+            onChange({
+              ...filters,
+              sortDir: event.target.value as MarketFilterState["sortDir"],
+            })
+          }
+        >
+          <option value="desc">{t("market.filter.sort.highLow")}</option>
+          <option value="asc">{t("market.filter.sort.lowHigh")}</option>
         </select>
       </div>
     </div>

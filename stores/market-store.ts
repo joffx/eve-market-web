@@ -21,6 +21,7 @@ export const useMarketStore = create<MarketStore>((set) => ({
     minPrice: "",
     maxPrice: "",
     sortBy: "price",
+    sortDir: "desc",
   },
   setSelectedTypeId: (typeId) => set({ selectedTypeId: typeId }),
   setFilters: (filters) => set({ filters }),

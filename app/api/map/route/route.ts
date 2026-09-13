@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { getSystemByName } from "@/data/systems"
 import { EsiError, esiFetch, esiPost } from "@/lib/eve/esi"
 import { getSystemDetails } from "@/lib/eve/route"
 import { resolveLocaleFromRequest, type Locale } from "@/lib/i18n/locale"
@@ -26,17 +27,22 @@ async function resolveSystemId(
   name: string,
   locale: Locale
 ): Promise<{ id: number; name: string } | null> {
-  const trimmed = name.trim()
-  if (!trimmed) {
+  const cleaned = name.trim().replace(/\*+$/g, "")
+  if (!cleaned) {
     return null
+  }
+
+  const local = getSystemByName(cleaned)
+  if (local) {
+    return { id: local.systemId, name: local.name }
   }
 
   const data = await esiPost<{
     systems?: Array<{ id: number; name: string }>
-  }>("/universe/ids/", [trimmed], locale)
+  }>("/universe/ids/", [cleaned], locale)
 
   const match = data.systems?.find(
-    (system) => system.name.toLowerCase() === trimmed.toLowerCase()
+    (system) => system.name.toLowerCase() === cleaned.toLowerCase()
   )
 
   return match ?? data.systems?.[0] ?? null
@@ -99,14 +105,35 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: translate(locale, "api.sameSystem") }, { status: 400 })
     }
 
-    const { data: systemIds } = await esiFetch<number[]>(
-      `/latest/route/${origin.id}/${destination.id}/`,
-      {
-        searchParams: { flag: FLAG_BY_PREFERENCE[preference] },
+    const flag = FLAG_BY_PREFERENCE[preference]
+    let systemIds: number[]
+    try {
+      const routed = await esiFetch<number[]>(`/latest/route/${origin.id}/${destination.id}/`, {
+        searchParams: { flag },
         revalidate: 3600,
         locale,
+      })
+      systemIds = routed.data
+    } catch (error) {
+      // Secure/insecure routes often 404 into null-sec; fall back to shortest.
+      if (
+        error instanceof EsiError &&
+        error.status === 404 &&
+        preference !== "shorter"
+      ) {
+        const routed = await esiFetch<number[]>(
+          `/latest/route/${origin.id}/${destination.id}/`,
+          {
+            searchParams: { flag: "shortest" },
+            revalidate: 3600,
+            locale,
+          }
+        )
+        systemIds = routed.data
+      } else {
+        throw error
       }
-    )
+    }
 
     const systems = await Promise.all(systemIds.map((systemId) => getSystemDetails(systemId)))
 
